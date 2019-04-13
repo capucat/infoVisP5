@@ -1,13 +1,10 @@
-var width =900;
+var width =800;
 var height = 600;
 var usingX;
 var usingY;
 
 //create SVGS for graph
-
-
 d3.csv("movies.csv", function(csv) {
-    console.log(csv);
 
     csvData = [...csv].map(function(d,i) {
         d["id"]=i;
@@ -208,7 +205,7 @@ d3.csv("movies.csv", function(csv) {
 		.call(xAxis) // call the axis generator
 		.append("text")
 		.attr("class", "label")
-		.attr("x", width-16)
+		.attr("x", 700)
 		.attr("y", -6)
 		.style("text-anchor", "end")
         .style("fill","black")
@@ -310,4 +307,25 @@ d3.csv("movies.csv", function(csv) {
     // function handleBrushEnd() {
     //
     // }
+
+    //Word Cloud
+
+    //setup wordcloud layout
+    // var layout = d3.layout.cloud()
+    //                         .timeInterval(10)
+    //                         .size([600,600])
+    //                         .words(data)
+    //                         .rotate(function(d){return 0;})
+    //                         .font('monospace')
+    //                         .fontSize(function(d,i){return fontSize(Math.random();)})
+    //                         .text(function(d) {return d.password;})
+    //                         .spiral("archimedean")
+    //                         .on("end",draw)
+    //                         .start();
+    // var svgWord = d3.select("#wordCloud")
+    //     .append("svg:svg")
+    //     .attr("width",600)
+    //     .attr("height",600)
+    //     .append("g")
+
 });
