@@ -70,6 +70,9 @@ d3.csv("movies.csv", function(csv) {
     // var xScale = d3.scaleLinear().domain([2010,2016]).range([0, width]);
     // var xScale = d3.scaleBand().rangeRound([0,width]);
     var xScale = d3.scaleLinear().domain([2010,2016]).range([0,600]); //domain([2010,2016])
+    var xScale = d3.scaleOrdinal()
+        .domain(["2010", "2011", "2012", "2013", "2014", "2015", "2016"])
+        .range([150, 250, 350, 450, 550, 650, 750]);
     // d3.scaleOrdinal().domain([2010,2016]).
     //.tickFormat(d3.timeFormat("%Y"))
     var yScale = d3.scaleLinear().domain(yExtent).range([height-30,30]);
