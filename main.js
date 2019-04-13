@@ -69,7 +69,7 @@ d3.csv("movies.csv", function(csv) {
     var xScale = d3.scaleLinear().domain([2010,2016]).range([0,600]); //domain([2010,2016])
     var xScale = d3.scaleOrdinal()
         .domain(["2010", "2011", "2012", "2013", "2014", "2015", "2016"])
-        .range([150, 250, 350, 450, 550, 650, 750]);
+        .range([10, 110, 210, 310, 410, 510, 610]);
     // d3.scaleOrdinal().domain([2010,2016]).
     //.tickFormat(d3.timeFormat("%Y"))
     var yScale = d3.scaleLinear().domain(yExtent).range([height-30,30]);
@@ -157,7 +157,48 @@ d3.csv("movies.csv", function(csv) {
 	   .attr("cy", function(d) { return yScale(d.gross); })
 	   .attr("r", 5)
        .attr("transform", "translate(100,0)")
-	   // .on("click", function(d){
+	   .on("click", function(d){
+            d3.select("#detailsOnDemand").select("#mvt")
+            .text(d.movie_title);
+            d3.select("#detailsOnDemand").select("#dn")
+            .text(d.director_name);
+            d3.select("#detailsOnDemand").select("#dur")
+            .text(d.duration);
+            d3.select("#detailsOnDemand").select("#genr")
+            .text(d.genres);
+            d3.select("#detailsOnDemand").select("#imsc")
+            .text(d.imbd_score);
+            d3.select("#detailsOnDemand").select("#imlk")
+            .text(d.movie_imdb_link);
+            d3.select("#detailsOnDemand").select("#ctrng")
+            .text(d.content_rating);
+            d3.select("#detailsOnDemand").select("#yr")
+            .text(d.title_year);
+            d3.select("#detailsOnDemand").select("#plkw")
+            .text(d.plot_keywords);
+            d3.select("#detailsOnDemand").select("#lang")
+            .text(d.language);
+            d3.select("#detailsOnDemand").select("#asrt")
+            .text(d.aspect_ratio);
+            d3.select("#detailsOnDemand").select("#mfbl")
+            .text(d.movie_facebook_likes);
+            d3.select("#detailsOnDemand").select("#col")
+            .text(d.color);
+
+            var clickedid= d3.select(this).attr("id");
+
+            //mainScatter.selectAll('circle').classed("clicked", false);
+            svgGraph.selectAll('circle').filter(function(e) {
+                return e.id==d.id;
+            })
+            .classed("clicked",true);
+
+            svgGraph.selectAll('circle').filter(function(e) {
+                return e.id!=d.id;
+            })
+            .classed("clicked",false);
+        });
+
        //     d3.select("#satm")
        //     .text(d.SATM);
        //     d3.select("#satv")

@@ -27,6 +27,11 @@ path.domain {
 #mainScatter {
     float:left;
 }
+
+.clicked {
+	fill:red;
+	stroke:red;
+}
 /* #chart2{
 	float:left;
 }
