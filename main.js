@@ -37,10 +37,14 @@ d3.csv("movies.csv", function(csv) {
         d['aspect_ratio']=+d['aspect_ratio'];
         d['movie_facebook_likes']=+d['movie_facebook_likes'];
         return d;
-    })
+    });
+    // plotData = [...csv].map(function(d,i){
+    //     d["id"]=i;
+    //
+    //     return d.plot_keywords.split("|");
+    // });
     console.log(csvData);
-
-
+    // console.log(plotData);
 
     var svgGraph = d3.select("#mainScatter")
         .append("svg:svg")
@@ -311,21 +315,98 @@ d3.csv("movies.csv", function(csv) {
     //Word Cloud
 
     //setup wordcloud layout
-    // var layout = d3.layout.cloud()
-    //                         .timeInterval(10)
-    //                         .size([600,600])
-    //                         .words(data)
-    //                         .rotate(function(d){return 0;})
-    //                         .font('monospace')
-    //                         .fontSize(function(d,i){return fontSize(Math.random();)})
-    //                         .text(function(d) {return d.password;})
-    //                         .spiral("archimedean")
-    //                         .on("end",draw)
-    //                         .start();
-    // var svgWord = d3.select("#wordCloud")
-    //     .append("svg:svg")
-    //     .attr("width",600)
-    //     .attr("height",600)
-    //     .append("g")
+    var words = ["Hello", "world", "normally", "you", "want", "more", "words", "than", "this"]
+    .map(function(d) {
+      return {text: d, size: 10 + Math.random() * 90};
+    });
+
+    var fontSize = d3.scalePow().exponent(5).domain([0,1]).range([10,80]);
+
+    var layout = d3.layout.cloud()
+                            .timeInterval(10)
+                            .size([600,600])
+                            // .words(csvData.map(function(d) {
+                            //       return {text: d.plot_keywords.split("|"), size: 10 + Math.random() * 90, test: "haha"};
+                            //     }))
+                            .words(newWords(csvData))
+                            .rotate(function(d){return 0;})
+                            .font('Impact')
+                            .fontSize(function(d,i){return d.size;})
+                            // .text(function(d) {return d.password;})
+                            .spiral("archimedean")
+                            .on("end",draw)
+                            .start();
+    // newWords();
+    // var plotsAll = csvData.map(function(p){
+    //     // console.log(p.plot_keywords.split("|"));
+    //     return p.plot_keywords.split("|");
+    // });
+
+    function newWords(plots) {
+        //access a single movie
+        var plots = csvData[0].plot_keywords.split("|");
+        console.log(plots.length);
+        var plotArr = [];
+        plots.forEach(function(d,i) {
+            console.log(d);
+            //all plots array
+            // console.log(plotsAll);
+            var plotsAll = csvData.map(function(p){
+                // console.log(p.plot_keywords.split("|"));
+                return p.plot_keywords.split("|");
+            });
+            var count =10;
+            plotsAll.forEach(function(item){
+                item.forEach(function(p) {
+                    if(p.includes(d)) {
+                        count++;
+                        // console.log("same plot"+p);
+                    }
+                })
+            })
+            console.log(count);
+            plotArr.push({text:d, size:count});
+            // })
+        //
+        //     // console.log(i);
+        //     // d.text.forEach(function(p,i) {
+        //     //     if(plotArr.includes(p)){
+        //     //         d.size+=10;
+        //     //     } else {
+        //     //         // plotArr.push({text: p, size:d.size});
+                    // plotArr.push(p);
+        //     //         // console.log(p);
+        //     //     }
+        //     //     // plotArr.push({text: p, size:d.size});
+        //     //     // console.log(p);
+        //     // })
+        })
+        // console.log(plotArr);
+        return plotArr;
+
+        // return csvData.map(function(d){return d.plot_keywords.split("|");});
+    }
+    var svgWord = d3.select("#wordCloud")
+        .append("svg:svg")
+        .attr("width",600)
+        .attr("height",600)
+        .append("g");
+    var wordcloud = svgWord.append("g")
+        .attr('class','wordcloud')
+        .attr('transform','translate('+300+","+300+")");
+
+    function draw(words) {
+        wordcloud.selectAll("text")
+        .data(words)
+        .enter().append("text")
+        .attr('class','word')
+        .style("font-size", function(d) { return d.size + "px"; })
+        .style("font-family", "Impact")
+        .style("fill", "red")
+        .attr("text-anchor", "middle")
+        .attr("transform", function(d) { return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")"; })
+        .text(function(d) { return d.text; });
+    }
+
 
 });
