@@ -449,5 +449,96 @@ d3.csv("movies.csv", function(csv) {
         .text(function(d) { return d.text; });
     }
 
+    drawMovies(csvData);
 
 });
+//calendar
+function drawMovies(csvData){
+    console.log(csvData);
+    console.log("movie");
+    //category corresponds to the grouping
+    // var category = function(aGroup){
+    //
+    // }
+    var cellMargin = 2;
+    var cellSize = 20;
+    // var catArray =
+    var genreAll = [];
+    csvData.forEach(function(d){
+        var gen = d.genres.split("|");
+        gen.forEach(function(g) {
+            if(!genreAll.includes(g)) {
+                genreAll.push(g);
+            }
+        })
+    })
+    // var genreAll = csvData.map(function(p){
+    //     // console.log(p.plot_keywords.split("|"));
+    //     return p.genres;
+    // });
+    console.log(genreAll);
+    // function catName(){
+    //
+    //     // var genreAll = csvData.map(function(p){
+    //     //     // console.log(p.plot_keywords.split("|"));
+    //     //     return p.genre;
+    //     // });
+    //
+    // }
+    var years = [2010,2011,2012,2013,2014,2015,2016];
+    var movieCalSvg = d3.select("#calendar").selectAll("svg")
+        .data(genreAll)
+        .enter().append("svg")
+        .attr("class", "year")
+        .attr("height", ((cellSize*7) + cellMargin*8 + 20))
+        .attr("width", function(d){
+            var columns = 4;
+            return((cellSize*columns) + (cellMargin*(columns+1)));
+        })
+        .append("g")
+
+    movieCalSvg.append("text")
+        .attr("class","catName")
+        .attr("y", (cellSize*7)+(cellMargin*8)+15)
+        .attr("x", function(d){
+            var columns = 4;
+            return(((cellSize*columns) + (cellMargin*(columns+1)))/2);
+        })
+        .attr("text-anchor","middle")
+        .text(function(d){return d;})
+
+    var info = d3.select("#calendar").append("div")
+                .attr("class","tooltip")
+                .style("opacity",0);
+
+    console.log(csvData.movie_title);
+    var rect = movieCalSvg.selectAll("rect.movie")
+        .data(csvData)
+        .enter().append("rect")
+        .attr("class","movie")
+        .attr("width", cellSize)
+        .attr("height", cellSize)
+        .attr("rx",3).attr("ry",3)
+        .attr("fill","#eaeaea")
+        .attr("y", function(d) { return (d.id * cellSize) + (d.id * cellMargin) + cellMargin; })
+        .attr("x", function(d) { return (d.id * cellSize) + (d.id * cellMargin) + cellMargin ; })
+        .on("mouseover", function(d) {
+            info.transition()
+                .duration(200)
+                .style("opacity",.9)
+            info.html(d.movie_title + "<br/>"  + "other info")
+                .style("opacity",.9)
+                .style("left",(d3.event.pageX)+"px")
+                .style("top",(d3.event.pageY-28)+"px");
+        })
+        .on("mouseout", function(d) {
+            info.transition()
+                .duration(500)
+                .style("opacity", 0);
+        })
+        // .datum(format);
+
+    //rect.append("title")
+        // .text(function(d){return;})
+    // rect.filter()
+}
