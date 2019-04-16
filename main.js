@@ -454,6 +454,7 @@ d3.csv("movies.csv", function(csv) {
 });
 //calendar
 function drawMovies(csvData){
+
     console.log(csvData);
     console.log("movie");
     //category corresponds to the grouping
@@ -461,7 +462,7 @@ function drawMovies(csvData){
     //
     // }
     var cellMargin = 2;
-    var cellSize = 20;
+    var cellSize = 12;
     // var catArray =
     var genreAll = [];
     csvData.forEach(function(d){
@@ -485,59 +486,334 @@ function drawMovies(csvData){
     //     // });
     //
     // }
-    var years = [2010,2011,2012,2013,2014,2015,2016];
-    var movieCalSvg = d3.select("#calendar").selectAll("svg")
-        .data(genreAll)
-        .enter().append("svg")
-        .attr("class", "year")
-        .attr("height", ((cellSize*7) + cellMargin*8 + 20))
-        .attr("width", function(d){
-            var columns = 4;
-            return((cellSize*columns) + (cellMargin*(columns+1)));
-        })
-        .append("g")
+    // var years = [2010,2011,2012,2013,2014,2015,2016];
 
+    //note ('' untitled year is considered a key still)
+    var years = d3.nest()
+        .key(d=>d.title_year).sortKeys(d3.descending)
+        .entries(csvData)
+        // .slice(1,years.length)
+        .reverse();
+    // //remove '' key
+    years=years.slice(1,years.length)
+    console.log(years);
+    //
+    // // "#calendar"
+    // var movieCalSvg = d3.select("#calendar")
+    //     // .append("svg")
+    //     .attr("height", height*years.length)
+    //     .attr("width", "900")
+    //     .attr("font","10px sans-serif")
+    //     .style("width","100%")
+    //     .style("height","auto");
+    //
+    // var yearCal = movieCalSvg.selectAll("rect.movie")
+    //     .data(csvData)
+    //     .enter().append("rect")
+    //     // .join("rect")
+    //     .attr("class","movie")
+    //     .attr("width", cellSize - 1)
+    //      .attr("height", cellSize - 1)
+    //      .attr("x", 5*cellSize + 0.5)
+    //      .attr("y", 10* cellSize + 0.5)
+    //      .attr("fill", "red")
+    // var yearCal = movieCalSvg.selectAll(".yr")
+    //     .data(years)
+        // .append("g")
+        // .join(".yr")
+        //     .attr("transform",(d,i)=>`translate(40,${height * i + cellSize * 1.5})`);
+
+
+
+    var col;
+    var movieCalSvg = d3.select("#calendar").selectAll("svg")
+        .data(years)
+        .enter().append("svg")
+        .attr("class", "yearCal")
+        .attr("id",function(d,i){return 'year'+d.key})
+        .attr("height", ((cellSize*14) + cellMargin*4 + 20))
+        .attr("transform",(d,i)=>`translate(0,100)`) //${height + cellSize * 1.5}
+        .attr("width", cellSize*14*genreAll.length)
+        // function(d){
+            // col = csvData.reduce(function(f,val){
+            //     return f+(val.title_year===d.key)
+            // },0);
+            // console.log(col);
+            // return((cellSize*col) + (cellMargin*(col+1)));
+            // var columns = 4;
+            // return((cellSize*columns) + (cellMargin*(columns+1)));
+
+        // })
+        // .append("g")
+
+    //for each year, put the year on the side
     movieCalSvg.append("text")
-        .attr("class","catName")
-        .attr("y", (cellSize*7)+(cellMargin*8)+15)
-        .attr("x", function(d){
-            var columns = 4;
-            return(((cellSize*columns) + (cellMargin*(columns+1)))/2);
-        })
-        .attr("text-anchor","middle")
-        .text(function(d){return d;})
+        .attr("class","year")
+        .attr("y", 10)
+        .attr("x",30)
+        .attr("text-anchor","end")
+        .text(function(d){return d.key;})
 
     var info = d3.select("#calendar").append("div")
                 .attr("class","tooltip")
                 .style("opacity",0);
 
     console.log(csvData.movie_title);
-    var rect = movieCalSvg.selectAll("rect.movie")
-        .data(csvData)
-        .enter().append("rect")
-        .attr("class","movie")
-        .attr("width", cellSize)
-        .attr("height", cellSize)
-        .attr("rx",3).attr("ry",3)
-        .attr("fill","#eaeaea")
-        .attr("y", function(d) { return (d.id * cellSize) + (d.id * cellMargin) + cellMargin; })
-        .attr("x", function(d) { return (d.id * cellSize) + (d.id * cellMargin) + cellMargin ; })
-        .on("mouseover", function(d) {
-            info.transition()
-                .duration(200)
-                .style("opacity",.9)
-            info.html(d.movie_title + "<br/>"  + "other info")
-                .style("opacity",.9)
-                .style("left",(d3.event.pageX)+"px")
-                .style("top",(d3.event.pageY-28)+"px");
-        })
-        .on("mouseout", function(d) {
-            info.transition()
-                .duration(500)
-                .style("opacity", 0);
-        })
-        // .datum(format);
+    //make the genre the id of the g so that we know which corresponds
 
+    var genres;
+    // console.log(d3.select("#genre-Comedy"));
+    years.forEach(function(d,i){
+        console.log(d);
+        d3.select("#year"+d.key)
+            .selectAll("g.genre")
+            .data(genreAll)
+                .enter().append("g")
+                .attr("class","genre")
+                .attr("id", function(g) {return 'genre-'+g+d.key;})
+                .attr("transform",(d,i)=>`translate(${this.width/5*i},0)`)
+                // .attr("width", 400)
+                // .attr("height", 400)
+                .append("text")
+                .attr("x",100)
+                .attr("y",((cellSize*14) + cellMargin*4))
+                .attr("text-anchor","middle")
+                .text(function(g){return g;})
+
+        genreAll.forEach(function(g,i){
+            d3.select("#genre-"+g+d.key)
+            .selectAll("rect.movie")
+                .data(csvData.filter(function(f,l){
+                       if(f.genres.includes(g) &&f.title_year==d.key){
+                           return f;
+                       }
+                   }))
+                .enter()
+                .append("rect")
+                    .attr("class","movie")
+                    .attr("width", cellSize)
+                    .attr("height", cellSize)
+                    .attr("rx",3).attr("ry",3)
+                    .attr("fill","#eaeaea")
+                    .attr("transform",(f,i)=>`translate(40,0)`)
+                    //%cols
+                    //if i>cols cellsize*i()
+                    .attr("y", function(f,i) { console.log(i);return (Math.floor(i/10) * cellSize +(i/10)); }) //+ (d.id%col * cellMargin)
+                    .attr("x", function(f,i) { return (i%10) + cellSize*(i%10); })
+                    .on("mouseover", function(f) {
+                        info.transition()
+                            .duration(200)
+                            .style("opacity",.9)
+                        info.html(f.movie_title + "<br/>"  + f.title_year +"<br/>"+f.genres)
+                            .style("opacity",.9)
+                            .style("left",(d3.event.pageX)+"px")
+                            .style("top",(d3.event.pageY-28)+"px");
+                    })
+                    .on("mouseout", function(f) {
+                        info.transition()
+                            .duration(500)
+                            .style("opacity", 0);
+                    })
+        })
+
+    });
+
+
+    // years.forEach(function(d,i){
+    //     console.log(i);
+    //     d3.select("#year"+d.key)
+    //         .selectAll("svg.genre")
+    //         .data(genreAll).enter()
+    //         .append("svg")
+    //         .attr("class","genre")
+    //         .attr("id", function(d) {return 'genre-'+d;})
+    //         .attr("transform",(d,i)=>`translate(${200*i}px,0px)`)
+    //         .attr("width", "200px")
+    //         .attr("height", "200px")
+    //
+    //     genreAll.forEach(function(g,i){
+    //         // console.log(g+" "+d.key);
+    //         d3.select("#genre-"+g) //vs selectAll
+    //             .selectAll("rect.movie")
+    //             .data(csvData.filter(function(f){
+    //                 // console.log(f.title_year);
+    //                 // console.log(d.key);
+    //                    if(f.genres.includes(g) &&f.title_year==d.key){
+    //                        // console.log(d);
+    //                        return f;
+    //                    }
+    //                }))
+    //             .enter()
+    //             .append("rect")
+    //                 .attr("class","movie")
+    //                 .attr("width", cellSize)
+    //                 .attr("height", cellSize)
+    //                 .attr("rx",3).attr("ry",3)
+    //                 .attr("fill","#eaeaea")
+    //                 .attr("transform",(f,i)=>`translate(40,0)`)
+    //                 //%cols
+    //                 //if i>cols cellsize*i()
+    //                 .attr("y", function(f) { return (f.id/col * cellSize); }) //+ (d.id%col * cellMargin)
+    //                 .attr("x", function(f,i) { return f.id + cellSize*i; })
+    //                     .on("mouseover", function(f) {
+    //                         info.transition()
+    //                             .duration(200)
+    //                             .style("opacity",.9)
+    //                         info.html(f.movie_title + "<br/>"  + f.title_year +"<br/>"+f.genres)
+    //                             .style("opacity",.9)
+    //                             .style("left",(d3.event.pageX)+"px")
+    //                             .style("top",(d3.event.pageY-28)+"px");
+    //                     })
+    //                     .on("mouseout", function(f) {
+    //                         info.transition()
+    //                             .duration(500)
+    //                             .style("opacity", 0);
+    //                     })
+    //     })
+    // });
+
+    // d3.selectAll("svg.yearCal")
+    //     //each year
+    //     .each(function(d,i){
+    //         // console.log(d);
+    //         //each genre
+    //         genreAll.forEach(function(g,i){
+    //             // console.log(g+" "+d.key);
+    //             d3.select("#genre-"+g) //vs selectAll
+    //                 .selectAll("rect.movie")
+    //                 .data(csvData.filter(function(f){
+    //                     // console.log(f.title_year);
+    //                     // console.log(d.key);
+    //                        if(f.genres.includes(g) &&f.title_year==d.key){
+    //                            // console.log(d);
+    //                            return f;
+    //                        }
+    //                    }))
+    //                 .enter()
+    //                 .append("rect")
+    //                     .attr("class","movie")
+    //                     .attr("width", cellSize)
+    //                     .attr("height", cellSize)
+    //                     .attr("rx",3).attr("ry",3)
+    //                     .attr("fill","#eaeaea")
+    //                     .attr("transform",(f,i)=>`translate(40,0)`)
+    //                     //%cols
+    //                     //if i>cols cellsize*i()
+    //                     .attr("y", function(f) { return (f.id/col * cellSize); }) //+ (d.id%col * cellMargin)
+    //                     .attr("x", function(f,i) { return f.id + cellSize*i; })
+    //                         .on("mouseover", function(f) {
+    //                             info.transition()
+    //                                 .duration(200)
+    //                                 .style("opacity",.9)
+    //                             info.html(f.movie_title + "<br/>"  + f.title_year +"<br/>"+f.genres)
+    //                                 .style("opacity",.9)
+    //                                 .style("left",(d3.event.pageX)+"px")
+    //                                 .style("top",(d3.event.pageY-28)+"px");
+    //                         })
+    //                         .on("mouseout", function(f) {
+    //                             info.transition()
+    //                                 .duration(500)
+    //                                 .style("opacity", 0);
+    //                         })
+    //         })
+    //
+    //         // d3.selectAll("#genre-"+g)
+    //         //     .selectAll("rect.movie")
+    //         //     .data(csvData.filter(function(f){
+    //         //         // console.log(f.title_year);
+    //         //         // console.log(d.key);
+    //         //            if(f.genres.includes(g) &&f.title_year==d.key){
+    //         //                // console.log(d);
+    //         //                return f;
+    //         //            }
+    //         //        }))
+    //         //     .enter()
+    //         //     .append("rect")
+    //         //         .attr("class","movie")
+    //         //         .attr("width", cellSize)
+    //         //         .attr("height", cellSize)
+    //         //         .attr("rx",3).attr("ry",3)
+    //         //         .attr("fill","#eaeaea")
+    //         //         .attr("transform",(d,i)=>`translate(40,0)`)
+    //         //         //%cols
+    //         //         //if i>cols cellsize*i()
+    //         //         .attr("y", function(d) { return (d.id/col * cellSize); }) //+ (d.id%col * cellMargin)
+    //         //         .attr("x", function(d,i) { return d.id + cellSize*i; })
+    //     })
+
+
+    // genre.selectAll("svg.genre")
+    // d3.select(this).selectAll('path.area')
+    // movieCalSvg.selectAll("svg.genre")
+        // .data(genreAll)
+        // .enter().append('svg')
+        // .each(function(d,i){
+            // console.log(d);
+            // d3.select(this).selectAll('rect.movie')
+            //     .data([d])
+            // .enter()
+            // .append('rect')
+            // .attr("class","movie")
+            //     .attr("width", cellSize)
+            //     .attr("height", cellSize)
+            //     .attr("rx",3).attr("ry",3)
+            //     .attr("fill","#eaeaea")
+            //     .attr("transform",(d,i)=>`translate(40,0)`)
+                //%cols
+                //if i>cols cellsize*i()
+                // .attr("y", function(d) { return (d.id/col * cellSize); }) //+ (d.id%col * cellMargin)
+                // .attr("x", function(d,i) { return d.id + cellSize*i; })
+        // })
+
+
+    // });
+
+    // var rect = genre.selectAll("rect.movie")
+    //     // .data(csvData.filter(function(d){console.log(this.id);return d.genres.includes(this.id);}))
+    //     .data(csvData.filter(function(d){
+    //         if(d.genres.includes("Comedy") &&d.title_year==2010){
+    //             console.log(d);
+    //             return d;
+    //         }
+    //     }))
+    //     .enter().append("rect")
+    //     // .filter(function(d){return d.genre.includes()})
+    //     .attr("class","movie")
+    //     .attr("width", cellSize)
+    //     .attr("height", cellSize)
+    //     .attr("rx",3).attr("ry",3)
+    //     .attr("fill","#eaeaea")
+    //     .attr("transform",(d,i)=>`translate(40,0)`)
+    //     //%cols
+    //     //if i>cols cellsize*i()
+    //     .attr("y", function(d) { return (d.id/col * cellSize); }) //+ (d.id%col * cellMargin)
+    //     .attr("x", function(d,i) { return d.id + cellSize*i; })
+    //     .on("mouseover", function(d) {
+    //         info.transition()
+    //             .duration(200)
+    //             .style("opacity",.9)
+    //         info.html(d.movie_title + "<br/>"  + "other info")
+    //             .style("opacity",.9)
+    //             .style("left",(d3.event.pageX)+"px")
+    //             .style("top",(d3.event.pageY-28)+"px");
+    //     })
+    //     .on("mouseout", function(d) {
+    //         info.transition()
+    //             .duration(500)
+    //             .style("opacity", 0);
+    //     })
+
+
+        // .datum(format);
+    // rect.filter(function(d) {
+    //     if(d.id<2){
+    //         return d.movie_title;
+    //     }
+    //
+    // })
+    // .style("fill","red")
+    // .select("movie")
+    // .text()
     //rect.append("title")
         // .text(function(d){return;})
     // rect.filter()
