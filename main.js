@@ -19,7 +19,7 @@ featureLinOrd["budget"] = "Linear"
 featureLinOrd["content_rating"] = "Ordinal"
 featureLinOrd["genres"] = "Ordinal"
 
-
+var clickedMovie;
 //create SVGS for graph
 d3.csv("movies.csv", function(csv) {
 
@@ -211,7 +211,8 @@ d3.csv("movies.csv", function(csv) {
             .text(d.country);
 
             var clickedid= d3.select(this).attr("id");
-
+            clickedMovie=d.id; //this is the movie to make wordcloud for
+            wordCloudGen.update(newWords());
             //mainScatter.selectAll('circle').classed("clicked", false);
             svgGraph.selectAll('circle').filter(function(e) {
                 return e.id==d.id;
@@ -416,40 +417,18 @@ d3.csv("movies.csv", function(csv) {
     //
     // }
 
-    //Word Cloud
-
-    //setup wordcloud layout
-    var words = ["Hello", "world", "normally", "you", "want", "more", "words", "than", "this"]
-    .map(function(d) {
-      return {text: d, size: 10 + Math.random() * 90};
-    });
-
-    var fontSize = d3.scalePow().exponent(5).domain([0,1]).range([10,80]);
-
-    var layout = d3.layout.cloud()
-                            .timeInterval(10)
-                            .size([600,600])
-                            // .words(csvData.map(function(d) {
-                            //       return {text: d.plot_keywords.split("|"), size: 10 + Math.random() * 90, test: "haha"};
-                            //     }))
-                            .words(newWords(csvData))
-                            .rotate(function(d){return 0;})
-                            .font('Impact')
-                            .fontSize(function(d,i){return d.size;})
-                            // .text(function(d) {return d.password;})
-                            .spiral("archimedean")
-                            .on("end",draw)
-                            .start();
-    // newWords();
-    // var plotsAll = csvData.map(function(p){
-    //     // console.log(p.plot_keywords.split("|"));
-    //     return p.plot_keywords.split("|");
-    // });
-
+    //WORDCLOUD
     function newWords(plots) {
-        //access a single movie
-        var plots = csvData[0].plot_keywords.split("|");
-        console.log(plots.length);
+        //temp default wordcloud words
+        var words = ["Hello", "world", "normally", "you", "want", "more", "words", "than", "this"]
+        .map(function(d) {
+          return {text: d, size: 10 + Math.random() * 90};
+        });
+
+        var plots=words;
+        if(clickedMovie!=null){ //if a movie is clicked, use that one's keywords
+            plots = csvData[clickedMovie].plot_keywords.split("|");
+        }
         var plotArr = [];
         plots.forEach(function(d,i) {
             console.log(d);
@@ -464,53 +443,184 @@ d3.csv("movies.csv", function(csv) {
                 item.forEach(function(p) {
                     if(p.includes(d)) {
                         count++;
-                        // console.log("same plot"+p);
                     }
                 })
             })
             console.log(count);
             plotArr.push({text:d, size:count});
-            // })
-        //
-        //     // console.log(i);
-        //     // d.text.forEach(function(p,i) {
-        //     //     if(plotArr.includes(p)){
-        //     //         d.size+=10;
-        //     //     } else {
-        //     //         // plotArr.push({text: p, size:d.size});
-                    // plotArr.push(p);
-        //     //         // console.log(p);
-        //     //     }
-        //     //     // plotArr.push({text: p, size:d.size});
-        //     //     // console.log(p);
-        //     // })
+
         })
-        // console.log(plotArr);
         return plotArr;
 
-        // return csvData.map(function(d){return d.plot_keywords.split("|");});
     }
-    var svgWord = d3.select("#wordCloud")
-        .append("svg:svg")
-        .attr("width",600)
-        .attr("height",600)
-        .append("g");
-    var wordcloud = svgWord.append("g")
-        .attr('class','wordcloud')
-        .attr('transform','translate('+300+","+300+")");
 
-    function draw(words) {
-        wordcloud.selectAll("text")
-        .data(words)
-        .enter().append("text")
-        .attr('class','word')
-        .style("font-size", function(d) { return d.size + "px"; })
-        .style("font-family", "Impact")
-        .style("fill", "red")
-        .attr("text-anchor", "middle")
-        .attr("transform", function(d) { return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")"; })
-        .text(function(d) { return d.text; });
+    var wordCloudGen = wordCloudGen();
+    wordCloudGen.update(newWords());
+    //Wordcloud generator w draw and update functions
+    function wordCloudGen(){
+        var fontSize = d3.scalePow().exponent(5).domain([0,1]).range([10,80]);
+
+
+        var svgWord = d3.select("#wordCloud")
+            .append("svg:svg")
+            .attr("width",400)
+            .attr("height",400)
+            // .attr("transform", function(d) { return "translate(30,0)"; })
+            .append("g")
+                .attr("transform", function(d) { return "translate(200,200)"; })
+
+        function draw(words) {
+            console.log("drawing wc");
+            console.log(words);
+
+            var wordcloud = svgWord.selectAll("g text")
+                .data(words,function(d) { return d.text; })
+
+            wordcloud.enter()
+                .append("text")
+                .attr('class','word')
+                .style("font-size", function(d) { return d.size + "px"; })
+                .style("font-family", "Impact")
+                .style("fill", "red")
+                .attr("text-anchor", "middle")
+                .attr("transform", function(d) { return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")"; })
+                // .attr("transform", function(d) { return "translate(" + [Math.abs(d.x)+(Math.random()*4), Math.abs(d.y)+(Math.random()*4)] + ")rotate(" + d.rotate + ")"; })
+
+                .text(function(d) { return d.text; });
+            wordcloud.transition()
+                .duration(1000)
+                .style("font-size",function(d){return d.size+"px";})
+                .attr("transform", function(d) { return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")"; })
+                // .attr("transform",function(d){return "translate(" + [Math.abs(d.x), Math.abs(d.y)] + ")rotate(" + d.rotate + ")"; })
+                .style("fill-opacity",1);
+            wordcloud.exit()
+                .transition()
+                .duration(1000)
+                .style("fill-opacity",1e-6)
+                .style("font-size",1)
+                .remove();
+            // wordcloud.selectAll("text")
+            // .data(words)
+            // .enter().append("text")
+            // .attr('class','word')
+            // .style("font-size", function(d) { return d.size + "px"; })
+            // .style("font-family", "Impact")
+            // .style("fill", "red")
+            // .attr("text-anchor", "middle")
+            // .attr("transform", function(d) { return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")"; })
+            // .text(function(d) { return d.text; });
+        }
+        return {
+            update:function(words) {
+
+                d3.layout.cloud()
+                    .timeInterval(10)
+                    .size([600,600])
+                    .padding(1)
+                    .words(words)
+                    //.words(newWords(csvData))
+                    .rotate(function() { return ~~(Math.random() * 2) * 90; })
+                    .font('Impact')
+                    .fontSize(function(d,i){return d.size;})
+                    // .text(function(d) {return d.password;})
+                    .spiral("archimedean")
+                    .on("end",draw)
+                    .start();
+                }
+        }
+
     }
+    // var fontSize = d3.scalePow().exponent(5).domain([0,1]).range([10,80]);
+    //
+    // var layout = d3.layout.cloud()
+    //                         .timeInterval(10)
+    //                         .size([600,600])
+    //                         // .words(csvData.map(function(d) {
+    //                         //       return {text: d.plot_keywords.split("|"), size: 10 + Math.random() * 90, test: "haha"};
+    //                         //     }))
+    //                         .words(newWords(csvData))
+    //                         .rotate(function(d){return 0;})
+    //                         .font('Impact')
+    //                         .fontSize(function(d,i){return d.size;})
+    //                         // .text(function(d) {return d.password;})
+    //                         .spiral("archimedean")
+    //                         .on("end",draw)
+    //                         .start();
+    // // newWords();
+    // // var plotsAll = csvData.map(function(p){
+    // //     // console.log(p.plot_keywords.split("|"));
+    // //     return p.plot_keywords.split("|");
+    // // });
+    //
+    // function newWords(plots) {
+    //     //access a single movie
+    //     var plots=words;
+    //     if(clickedMovie!=null){
+    //         plots = csvData[clickedMovie].plot_keywords.split("|");
+    //     }
+    //     // var plots = csvData[clickedMovie].plot_keywords.split("|");
+    //     console.log(plots.length);
+    //     var plotArr = [];
+    //     plots.forEach(function(d,i) {
+    //         console.log(d);
+    //         //all plots array
+    //         // console.log(plotsAll);
+    //         var plotsAll = csvData.map(function(p){
+    //             // console.log(p.plot_keywords.split("|"));
+    //             return p.plot_keywords.split("|");
+    //         });
+    //         var count =10;
+    //         plotsAll.forEach(function(item){
+    //             item.forEach(function(p) {
+    //                 if(p.includes(d)) {
+    //                     count++;
+    //                     // console.log("same plot"+p);
+    //                 }
+    //             })
+    //         })
+    //         console.log(count);
+    //         plotArr.push({text:d, size:count});
+    //         // })
+    //     //
+    //     //     // console.log(i);
+    //     //     // d.text.forEach(function(p,i) {
+    //     //     //     if(plotArr.includes(p)){
+    //     //     //         d.size+=10;
+    //     //     //     } else {
+    //     //     //         // plotArr.push({text: p, size:d.size});
+    //                 // plotArr.push(p);
+    //     //     //         // console.log(p);
+    //     //     //     }
+    //     //     //     // plotArr.push({text: p, size:d.size});
+    //     //     //     // console.log(p);
+    //     //     // })
+    //     })
+    //     // console.log(plotArr);
+    //     return plotArr;
+    //
+    //     // return csvData.map(function(d){return d.plot_keywords.split("|");});
+    // }
+    // var svgWord = d3.select("#wordCloud")
+    //     .append("svg:svg")
+    //     .attr("width",600)
+    //     .attr("height",600)
+    //     .append("g");
+    // var wordcloud = svgWord.append("g")
+    //     .attr('class','wordcloud')
+    //     .attr('transform','translate('+300+","+300+")");
+    //
+    // function draw(words) {
+    //     wordcloud.selectAll("text")
+    //     .data(words)
+    //     .enter().append("text")
+    //     .attr('class','word')
+    //     .style("font-size", function(d) { return d.size + "px"; })
+    //     .style("font-family", "Impact")
+    //     .style("fill", "red")
+    //     .attr("text-anchor", "middle")
+    //     .attr("transform", function(d) { return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")"; })
+    //     .text(function(d) { return d.text; });
+    // }
 
     drawMovies(csvData);
 
@@ -621,7 +731,6 @@ function drawMovies(csvData){
                 .style("opacity",0);
 
     //make the genre the id of the g so that we know which corresponds
-    // var genres;
     years.forEach(function(d,i){
         d3.select("#year"+d.key) //-> to draw filtered year, change all d.key to yrFILTER
         // d3.select("#year"+yrFILTER)
