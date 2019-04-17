@@ -68,7 +68,7 @@ d3.csv("movies.csv", function(csv) {
     console.log(csvData);
     // console.log(plotData);
 
-    
+
         // .attr("transform","translate("+200+","+20+")")
 
     var xExtent = d3.extent(csv, function(row) { return row.title_year; });
@@ -515,20 +515,69 @@ d3.csv("movies.csv", function(csv) {
     drawMovies(csvData);
 
 });
-//calendar
+//CALENDAR
+var colorFILTER = "";
+
+function getColor(dataItem){
+
+    var myColor = d3.scaleLinear()
+      .range(["white", "#69b3a2"])
+
+    if(colorFILTER=='gross'){
+
+        var maxVal = Math.max.apply(Math, csvData.map(function(d){return d.gross;}));
+        //empty was considered 0, so i removed
+        var noZeroes = csvData.filter(function(d) { return d.gross !== 0; });
+        var minVal = d3.min(noZeroes, function(d) {return d.gross; });
+        myColor.domain([minVal,maxVal]);
+
+        return myColor(Math.floor(dataItem.gross));
+    } else if(colorFILTER=='imdb_score'){
+        var maxVal = Math.max.apply(Math, csvData.map(function(d){return d.imdb_score;}));
+        var minVal = d3.min(csvData, function(d) {return d.imdb_score; });
+        myColor.domain([minVal,maxVal]);
+
+        return myColor(Math.floor(dataItem.imdb_score));
+    } else if(colorFILTER =='movie_facebook_likes'){
+        var maxVal = Math.max.apply(Math, csvData.map(function(d){return d.movie_facebook_likes;}));
+        var minVal = d3.min(csvData, function(d) {return d.movie_facebook_likes; });
+        myColor.domain([minVal,maxVal]);
+        return myColor(Math.floor(dataItem.movie_facebook_likes));
+    } else if(colorFILTER =='budget'){
+        var maxVal = Math.max.apply(Math, csvData.map(function(d){return d.budget;}));
+        var minVal = d3.min(csvData, function(d) {return d.budget; });
+        myColor.domain([minVal,maxVal]);
+        return myColor(Math.floor(dataItem.budget));
+    } else if(colorFILTER =='num_critic_for_reviews'){
+        var maxVal = Math.max.apply(Math, csvData.map(function(d){return d.num_critic_for_reviews;}));
+        var minVal = d3.min(csvData, function(d) {return d.num_critic_for_reviews; });
+        myColor.domain([minVal,maxVal]);
+        return myColor(Math.floor(dataItem.num_critic_for_reviews));
+    }
+}
+
 function drawMovies(csvData){
 
-    console.log(csvData);
-    console.log("movie");
-    //category corresponds to the grouping
-    // var category = function(aGroup){
-    //
-    // }
-    var cellMargin = 2;
+    //filter by year selection
+    yrFILTER = d3.select('#yrChoice').property('value');
+    var yr = d3.select("#yrChoice")
+        .on('change',onchangeY)
+    function onchangeY() {
+        yrFILTER = d3.select('#yrChoice').property('value');
+    }
 
-    var cellSize = 12;
-    // var catArray =
+    //make it start by default on imdb score
+    colorFILTER = d3.select('#colorFilter').property('value');
+    var colorfill = d3.select("#colorFilter")
+        .on('change',onchangeV)
+    function onchangeV() {
+        colorFILTER = d3.select('#colorFilter').property('value');
+    }
+
+    var cellMargin = 2;
+    var cellSize = 10.5;
     var genreAll = [];
+
     csvData.forEach(function(d){
         var gen = d.genres.split("|");
         gen.forEach(function(g) {
@@ -537,21 +586,7 @@ function drawMovies(csvData){
             }
         })
     })
-    // var genreAll = csvData.map(function(p){
-    //     // console.log(p.plot_keywords.split("|"));
-    //     return p.genres;
-    // });
-    console.log(genreAll);
-    // function catName(){
-    //
-    //     // var genreAll = csvData.map(function(p){
-    //     //     // console.log(p.plot_keywords.split("|"));
-    //     //     return p.genre;
-    //     // });
-    //
-    // }
-
-    // var years = [2010,2011,2012,2013,2014,2015,2016];
+    genreAll.sort(); //alphabetically
 
     //note ('' untitled year is considered a key still)
     var years = d3.nest()
@@ -561,34 +596,6 @@ function drawMovies(csvData){
         .reverse();
     // //remove '' key
     years=years.slice(1,years.length)
-    console.log(years);
-    //
-    // // "#calendar"
-    // var movieCalSvg = d3.select("#calendar")
-    //     // .append("svg")
-    //     .attr("height", height*years.length)
-    //     .attr("width", "900")
-    //     .attr("font","10px sans-serif")
-    //     .style("width","100%")
-    //     .style("height","auto");
-    //
-    // var yearCal = movieCalSvg.selectAll("rect.movie")
-    //     .data(csvData)
-    //     .enter().append("rect")
-    //     // .join("rect")
-    //     .attr("class","movie")
-    //     .attr("width", cellSize - 1)
-    //      .attr("height", cellSize - 1)
-    //      .attr("x", 5*cellSize + 0.5)
-    //      .attr("y", 10* cellSize + 0.5)
-    //      .attr("fill", "red")
-    // var yearCal = movieCalSvg.selectAll(".yr")
-    //     .data(years)
-        // .append("g")
-        // .join(".yr")
-        //     .attr("transform",(d,i)=>`translate(40,${height * i + cellSize * 1.5})`);
-
-
 
     var col;
     var movieCalSvg = d3.select("#calendar").selectAll("svg")
@@ -596,20 +603,9 @@ function drawMovies(csvData){
         .enter().append("svg")
         .attr("class", "yearCal")
         .attr("id",function(d,i){return 'year'+d.key})
-        .attr("height", ((cellSize*14) + cellMargin*4 + 20))
-        .attr("transform",(d,i)=>`translate(0,100)`) //${height + cellSize * 1.5}
+        .attr("height", ((cellSize*35) + cellMargin*4 + 20))
+        .attr("transform",(d,i)=>`translate(0,40)`) //${height + cellSize * 1.5}
         .attr("width", cellSize*14*genreAll.length)
-        // function(d){
-            // col = csvData.reduce(function(f,val){
-            //     return f+(val.title_year===d.key)
-            // },0);
-            // console.log(col);
-            // return((cellSize*col) + (cellMargin*(col+1)));
-            // var columns = 4;
-            // return((cellSize*columns) + (cellMargin*(columns+1)));
-
-        // })
-        // .append("g")
 
     //for each year, put the year on the side
     movieCalSvg.append("text")
@@ -624,26 +620,20 @@ function drawMovies(csvData){
                 .attr("class","tooltip")
                 .style("opacity",0);
 
-    console.log(csvData.movie_title);
-
     //make the genre the id of the g so that we know which corresponds
-
-    var genres;
-    // console.log(d3.select("#genre-Comedy"));
+    // var genres;
     years.forEach(function(d,i){
-        console.log(d);
-        d3.select("#year"+d.key)
+        d3.select("#year"+d.key) //-> to draw filtered year, change all d.key to yrFILTER
+        // d3.select("#year"+yrFILTER)
             .selectAll("g.genre")
             .data(genreAll)
                 .enter().append("g")
                 .attr("class","genre")
                 .attr("id", function(g) {return 'genre-'+g+d.key;})
-                .attr("transform",(d,i)=>`translate(${this.width/5*i},0)`)
-                // .attr("width", 400)
-                // .attr("height", 400)
+                .attr("transform",(d,i)=>`translate(${this.width/6*Math.floor(i%(genreAll.length/2))},${200*Math.floor(i/(genreAll.length/2))})`)
                 .append("text")
                 .attr("x",100)
-                .attr("y",((cellSize*14) + cellMargin*4))
+                .attr("y",((cellSize*15) + cellMargin*4))
                 .attr("text-anchor","middle")
                 .text(function(g){return g;})
 
@@ -661,18 +651,20 @@ function drawMovies(csvData){
                     .attr("width", cellSize)
                     .attr("height", cellSize)
                     .attr("rx",3).attr("ry",3)
-                    .attr("fill","#eaeaea")
+                    .style("fill","#eaeaea")
+                    // .style("fill",function(c,i){return getColor(c);})
+
                     .attr("transform",(f,i)=>`translate(40,0)`)
                     //%cols
                     //if i>cols cellsize*i()
-                    .attr("y", function(f,i) { console.log(i);return (Math.floor(i/10) * cellSize +(i/10)); }) //+ (d.id%col * cellMargin)
+                    .attr("y", function(f,i) { return (Math.floor(i/10) * cellSize +(i/10)); }) //+ (d.id%col * cellMargin)
                     .attr("x", function(f,i) { return (i%10) + cellSize*(i%10); })
                     .on("mouseover", function(f) {
                         info.transition()
                             .duration(200)
-                            .style("opacity",.9)
+                            .style("opacity",.8)
                         info.html(f.movie_title + "<br/>"  + f.title_year +"<br/>"+f.genres)
-                            .style("opacity",.9)
+                            .style("opacity",.8)
                             .style("left",(d3.event.pageX)+"px")
                             .style("top",(d3.event.pageY-28)+"px");
                     })
@@ -685,203 +677,20 @@ function drawMovies(csvData){
 
     });
 
+    //change color based on filter for calendar
+    d3.select("#filCol")
+        .on('click',function() {
 
-    // years.forEach(function(d,i){
-    //     console.log(i);
-    //     d3.select("#year"+d.key)
-    //         .selectAll("svg.genre")
-    //         .data(genreAll).enter()
-    //         .append("svg")
-    //         .attr("class","genre")
-    //         .attr("id", function(d) {return 'genre-'+d;})
-    //         .attr("transform",(d,i)=>`translate(${200*i}px,0px)`)
-    //         .attr("width", "200px")
-    //         .attr("height", "200px")
-    //
-    //     genreAll.forEach(function(g,i){
-    //         // console.log(g+" "+d.key);
-    //         d3.select("#genre-"+g) //vs selectAll
-    //             .selectAll("rect.movie")
-    //             .data(csvData.filter(function(f){
-    //                 // console.log(f.title_year);
-    //                 // console.log(d.key);
-    //                    if(f.genres.includes(g) &&f.title_year==d.key){
-    //                        // console.log(d);
-    //                        return f;
-    //                    }
-    //                }))
-    //             .enter()
-    //             .append("rect")
-    //                 .attr("class","movie")
-    //                 .attr("width", cellSize)
-    //                 .attr("height", cellSize)
-    //                 .attr("rx",3).attr("ry",3)
-    //                 .attr("fill","#eaeaea")
-    //                 .attr("transform",(f,i)=>`translate(40,0)`)
-    //                 //%cols
-    //                 //if i>cols cellsize*i()
-    //                 .attr("y", function(f) { return (f.id/col * cellSize); }) //+ (d.id%col * cellMargin)
-    //                 .attr("x", function(f,i) { return f.id + cellSize*i; })
-    //                     .on("mouseover", function(f) {
-    //                         info.transition()
-    //                             .duration(200)
-    //                             .style("opacity",.9)
-    //                         info.html(f.movie_title + "<br/>"  + f.title_year +"<br/>"+f.genres)
-    //                             .style("opacity",.9)
-    //                             .style("left",(d3.event.pageX)+"px")
-    //                             .style("top",(d3.event.pageY-28)+"px");
-    //                     })
-    //                     .on("mouseout", function(f) {
-    //                         info.transition()
-    //                             .duration(500)
-    //                             .style("opacity", 0);
-    //                     })
-    //     })
-    // });
+            d3.selectAll("rect.movie")
+                .transition()
+                .duration(function(d) {
+                    return Math.random() * 10;
+                })
+                .delay(function(d) {
+                    return 10;
+                })
+                .style("fill",function(c,i){;return getColor(c);})
 
-    // d3.selectAll("svg.yearCal")
-    //     //each year
-    //     .each(function(d,i){
-    //         // console.log(d);
-    //         //each genre
-    //         genreAll.forEach(function(g,i){
-    //             // console.log(g+" "+d.key);
-    //             d3.select("#genre-"+g) //vs selectAll
-    //                 .selectAll("rect.movie")
-    //                 .data(csvData.filter(function(f){
-    //                     // console.log(f.title_year);
-    //                     // console.log(d.key);
-    //                        if(f.genres.includes(g) &&f.title_year==d.key){
-    //                            // console.log(d);
-    //                            return f;
-    //                        }
-    //                    }))
-    //                 .enter()
-    //                 .append("rect")
-    //                     .attr("class","movie")
-    //                     .attr("width", cellSize)
-    //                     .attr("height", cellSize)
-    //                     .attr("rx",3).attr("ry",3)
-    //                     .attr("fill","#eaeaea")
-    //                     .attr("transform",(f,i)=>`translate(40,0)`)
-    //                     //%cols
-    //                     //if i>cols cellsize*i()
-    //                     .attr("y", function(f) { return (f.id/col * cellSize); }) //+ (d.id%col * cellMargin)
-    //                     .attr("x", function(f,i) { return f.id + cellSize*i; })
-    //                         .on("mouseover", function(f) {
-    //                             info.transition()
-    //                                 .duration(200)
-    //                                 .style("opacity",.9)
-    //                             info.html(f.movie_title + "<br/>"  + f.title_year +"<br/>"+f.genres)
-    //                                 .style("opacity",.9)
-    //                                 .style("left",(d3.event.pageX)+"px")
-    //                                 .style("top",(d3.event.pageY-28)+"px");
-    //                         })
-    //                         .on("mouseout", function(f) {
-    //                             info.transition()
-    //                                 .duration(500)
-    //                                 .style("opacity", 0);
-    //                         })
-    //         })
-    //
-    //         // d3.selectAll("#genre-"+g)
-    //         //     .selectAll("rect.movie")
-    //         //     .data(csvData.filter(function(f){
-    //         //         // console.log(f.title_year);
-    //         //         // console.log(d.key);
-    //         //            if(f.genres.includes(g) &&f.title_year==d.key){
-    //         //                // console.log(d);
-    //         //                return f;
-    //         //            }
-    //         //        }))
-    //         //     .enter()
-    //         //     .append("rect")
-    //         //         .attr("class","movie")
-    //         //         .attr("width", cellSize)
-    //         //         .attr("height", cellSize)
-    //         //         .attr("rx",3).attr("ry",3)
-    //         //         .attr("fill","#eaeaea")
-    //         //         .attr("transform",(d,i)=>`translate(40,0)`)
-    //         //         //%cols
-    //         //         //if i>cols cellsize*i()
-    //         //         .attr("y", function(d) { return (d.id/col * cellSize); }) //+ (d.id%col * cellMargin)
-    //         //         .attr("x", function(d,i) { return d.id + cellSize*i; })
-    //     })
+        });
 
-
-    // genre.selectAll("svg.genre")
-    // d3.select(this).selectAll('path.area')
-    // movieCalSvg.selectAll("svg.genre")
-        // .data(genreAll)
-        // .enter().append('svg')
-        // .each(function(d,i){
-            // console.log(d);
-            // d3.select(this).selectAll('rect.movie')
-            //     .data([d])
-            // .enter()
-            // .append('rect')
-            // .attr("class","movie")
-            //     .attr("width", cellSize)
-            //     .attr("height", cellSize)
-            //     .attr("rx",3).attr("ry",3)
-            //     .attr("fill","#eaeaea")
-            //     .attr("transform",(d,i)=>`translate(40,0)`)
-                //%cols
-                //if i>cols cellsize*i()
-                // .attr("y", function(d) { return (d.id/col * cellSize); }) //+ (d.id%col * cellMargin)
-                // .attr("x", function(d,i) { return d.id + cellSize*i; })
-        // })
-
-
-    // });
-
-    // var rect = genre.selectAll("rect.movie")
-    //     // .data(csvData.filter(function(d){console.log(this.id);return d.genres.includes(this.id);}))
-    //     .data(csvData.filter(function(d){
-    //         if(d.genres.includes("Comedy") &&d.title_year==2010){
-    //             console.log(d);
-    //             return d;
-    //         }
-    //     }))
-    //     .enter().append("rect")
-    //     // .filter(function(d){return d.genre.includes()})
-    //     .attr("class","movie")
-    //     .attr("width", cellSize)
-    //     .attr("height", cellSize)
-    //     .attr("rx",3).attr("ry",3)
-    //     .attr("fill","#eaeaea")
-    //     .attr("transform",(d,i)=>`translate(40,0)`)
-    //     //%cols
-    //     //if i>cols cellsize*i()
-    //     .attr("y", function(d) { return (d.id/col * cellSize); }) //+ (d.id%col * cellMargin)
-    //     .attr("x", function(d,i) { return d.id + cellSize*i; })
-    //     .on("mouseover", function(d) {
-    //         info.transition()
-    //             .duration(200)
-    //             .style("opacity",.9)
-    //         info.html(d.movie_title + "<br/>"  + "other info")
-    //             .style("opacity",.9)
-    //             .style("left",(d3.event.pageX)+"px")
-    //             .style("top",(d3.event.pageY-28)+"px");
-    //     })
-    //     .on("mouseout", function(d) {
-    //         info.transition()
-    //             .duration(500)
-    //             .style("opacity", 0);
-    //     })
-
-
-        // .datum(format);
-    // rect.filter(function(d) {
-    //     if(d.id<2){
-    //         return d.movie_title;
-    //     }
-    //
-    // })
-    // .style("fill","red")
-    // .select("movie")
-    // .text()
-    //rect.append("title")
-        // .text(function(d){return;})
-    // rect.filter()
 }
