@@ -55,7 +55,7 @@ d3.csv("movies.csv", function(csv) {
         d['content_rating']=d['content_rating'];
         d['budget']=+d['budget'];
         d['title_year']=d['title_year'];
-        d['imbd_score']=+d['imbd_score'];
+        d['imdb_score']=+d['imdb_score'];
         d['aspect_ratio']=+d['aspect_ratio'];
         d['movie_facebook_likes']=+d['movie_facebook_likes'];
         return d;
@@ -65,7 +65,7 @@ d3.csv("movies.csv", function(csv) {
     //
     //     return d.plot_keywords.split("|");
     // });
-    console.log(csvData);
+    //console.log(csvData);
     // console.log(plotData);
 
 
@@ -73,7 +73,7 @@ d3.csv("movies.csv", function(csv) {
 
     var xExtent = d3.extent(csv, function(row) { return row.title_year; });
     var yExtent = d3.extent(csv, function(row) { return row.gross; });
-    console.log(xExtent);
+    //console.log(xExtent);
     // var actExtent = d3.extent(csv,  function(row) { return row.ACT;  });
     // var gpaExtent = d3.extent(csv,  function(row) {return row.GPA;   });
 
@@ -96,12 +96,12 @@ d3.csv("movies.csv", function(csv) {
     // d3.scaleOrdinal().domain([2010,2016]).
     //.tickFormat(d3.timeFormat("%Y"))
     var yScale = d3.scaleLinear().domain(yExtent).range([height-30,30]);
-    console.log(xScale);
+    //console.log(xScale);
+
+    var yAxis = d3.axisLeft().scale(yScale);
+    var xAxis = d3.axisBottom().scale(xScale);
     //ordinal scales
     //var xScale = d3.scal.ordinal().domain(...).rangeRoundBands(...);
-
-    var xAxis = d3.axisBottom().scale(xScale).ticks(7);
-    var yAxis = d3.axisLeft().scale(yScale);
 
     // var axisXGroup = svgGraph.append("g")
     //     .attr("class","x axis")
@@ -168,7 +168,7 @@ d3.csv("movies.csv", function(csv) {
 
 	 //add scatterplot points
 
-     console.log(csvData[0].title_year);
+     //console.log(csvData[0].title_year);
      var temp1= svgGraph.selectAll("circle")
 	   .data(csvData)
 	   .enter()
@@ -190,7 +190,7 @@ d3.csv("movies.csv", function(csv) {
             d3.select("#detailsOnDemand").select("#genr")
             .text(d.genres);
             d3.select("#detailsOnDemand").select("#imsc")
-            .text(d.imbd_score);
+            .text(d.imdb_score);
             d3.select("#detailsOnDemand").select("#imlk")
             .text(d.movie_imdb_link);
             d3.select("#detailsOnDemand").select("#ctrng")
@@ -209,6 +209,8 @@ d3.csv("movies.csv", function(csv) {
             .text(d.color);
             d3.select("#detailsOnDemand").select("#country")
             .text(d.country);
+            d3.select("#detailsOnDemand").select("#budget")
+            .text(d.budget);
 
             var clickedid= d3.select(this).attr("id");
             clickedMovie=d.id; //this is the movie to make wordcloud for
@@ -228,11 +230,41 @@ d3.csv("movies.csv", function(csv) {
        d3.select("#xAxisFilter").on("change", function (d) {
         xAxisSelector = d3.select("#xAxisFilter").node().value;
         console.log(xAxisSelector);
+        //var xScale = d3.scaleLinear();
         if (featureLinOrd[xAxisSelector] == "Linear") {
             //console.log(xScale);
-            var tempExtent = d3.extent(csvData, function(d) {return d.xAxisSelector})
-            console.log(tempExtent)
-            xScale.domain(tempExtent);
+            if (xAxisSelector == "num_critic_for_reviews") {
+                console.log("here");
+                xExtent = d3.extent(csvData, function(row) { return row.num_critic_for_reviews; });
+                xScale = d3.scaleLinear()
+                .domain(xExtent)
+                .range([10,width -10]);
+            } else if (xAxisSelector == "gross"){  
+                vxExtent = d3.extent(csv, function(row) { return row.gross; });
+                xScale = d3.scaleLinear()
+                .domain(xExtent)
+                .range([10,width -10]);
+            } else if (xAxisSelector == "imdb_score"){  
+                xExtent = d3.extent(csv, function(row) { return row.imdb_score; });
+                xScale = d3.scaleLinear()
+                .domain(xExtent)
+                .range([10,width -10]);
+            } else if (xAxisSelector == "num_voted_users"){  
+                xExtent = d3.extent(csv, function(row) { return row.num_voted_users; });
+                xScale = d3.scaleLinear()
+                .domain(xExtent)
+                .range([10,width -10]);
+            } else if (xAxisSelector == "num_user_for_reviews"){  
+                xExtent = d3.extent(csv, function(row) { return row.num_user_for_reviews; });
+                xScale = d3.scaleLinear()
+                .domain(xExtent)
+                .range([10,width -10]);
+            } else if (xAxisSelector == "budget"){  
+                xExtent = d3.extent(csv, function(row) { return row.budget; });
+                xScale = d3.scaleLinear()
+                .domain(xExtent)
+                .range([10,width -10]);
+            }
         } else if (xAxisSelector == "title_year") {
             xScale = d3.scaleOrdinal()
             .domain(["2010", "2011", "2012", "2013", "2014", "2015", "2016"])
@@ -243,28 +275,72 @@ d3.csv("movies.csv", function(csv) {
             .range([10, 60, 110, 160, 210, 260, 310, 360, 410, 460, 510, 560, 610]);
         }
 
+        //console.log(xScale.domain);
+        //console.log(xScale.range);
+        //console.log(svgGraph.select(".xaxis"));
+        svgGraph.selectAll(".xaxis")
+            .call(d3.axisBottom(xScale));
+
         svgGraph.selectAll("circle")
-            .attr('cx', function(d) { return xScale(d.xAxisSelector)});
+            .attr('cx', function(d) { return xScale(d[xAxisSelector])});
+        svgGraph
+            .select(".xaxis")
+            .selectAll(".tick")
+            .selectAll("text")
+            .attr("transform", "rotate(-45)")
     });
 
     d3.select("#yAxisFilter").on("change", function (d) {
-        yAxisSelector = d3.select("yAxisFilter").node().value;
-        if (featureLinOrd[yAxisSelector] == "Linear") {
-            var tempExtent = d3.extent(csvData, function(d) {return d.yAxisSelector})
-            console.log(tempExtent)
-            yScale.domain(tempExtent);
-        } else if (yAxisSelector == "title_year") {
+        yAxisSelector = d3.select("#yAxisFilter").node().value;
+        console.log(yAxisSelector);
+        if (yAxisSelector == "num_critic_for_reviews") {
+            yExtent = d3.extent(csv, function(row) { return row.num_critic_for_reviews; });
+            yScale = d3.scaleLinear()
+            .domain(yExtent)
+            .range([height-30,30]);
+        } else if (yAxisSelector == "gross"){  
+            yExtent = d3.extent(csv, function(row) { return row.gross; });
+            yScale = d3.scaleLinear()
+            .domain(yExtent)
+            .range([height-30,30]);
+        } else if (xAxisSelector == "imdb_score"){  
+            yExtent = d3.extent(csv, function(row) { return row.imdb_score; });
+            yScale = d3.scaleLinear()
+            .domain(yExtent)
+            .range([height-30,30]);
+        } else if (yAxisSelector == "num_voted_users"){  
+            yExtent = d3.extent(csv, function(row) { return row.num_voted_users; });
+            yScale = d3.scaleLinear()
+            .domain(yExtent)
+            .range([height-30,30]);
+        } else if (yAxisSelector == "num_user_for_reviews"){  
+            yExtent = d3.extent(csv, function(row) { return row.num_user_for_reviews; });
+            yScale = d3.scaleLinear()
+            .domain(yExtent)
+            .range([height-30,30]);
+        } else if (yAxisSelector == "budget"){  
+            yExtent = d3.extent(csv, function(row) { return row.budget; });
+            yScale = d3.scaleLinear()
+            .domain(yExtent)
+            .range([height-30,30]);
+            
+        } if (yAxisSelector == "title_year") {
             yScale = d3.scaleOrdinal()
             .domain(["2010", "2011", "2012", "2013", "2014", "2015", "2016"])
             .range([10, 110, 210, 310, 410, 510, 610]);
-        } else if (yAxisSelector == "content_rating") {
-            xScale = d3.scaleOrdinal()
+        } if (yAxisSelector == "content_rating") {
+            yScale = d3.scaleOrdinal()
             .domain(["G", "NC-17", "Not Rated", "PG", "PG-13", "R", "TV-14", "TV-G", "TV-MA", "TV-PG", "TV-Y", "TV-Y7", "Unrated"])
             .range([10, 60, 110, 160, 210, 260, 310, 360, 410, 460, 510, 560, 610]);
         }
-        yScale.extent(data, function (d) {return d.yAxisSelector})
+        //yScale.extent(data, function (d) {return d.yAxisSelector})
+        svgGraph.selectAll(".yaxis")
+            .call(d3.axisLeft(yScale));
+
         svgGraph.selectAll("circle")
-            .attr('cy',  function(d) { return yScale(d.yAxisSelector)});
+            .attr('cy',  function(d) { return yScale(d[yAxisSelector])});
+
+
     });
 
        //     d3.select("#satm")
@@ -310,22 +386,29 @@ d3.csv("movies.csv", function(csv) {
     //
     svgGraph // or something else that selects the SVG element in your visualizations
 		.append("g") // create a group node
+        .attr("class", "xaxis")
 		.attr("transform", "translate(100,"+ (600 -30)+ ")")
 		.call(xAxis) // call the axis generator
 		.append("text")
-		.attr("class", "label")
 		.attr("x", 700)
 		.attr("y", -6)
 		.style("text-anchor", "end")
         .style("fill","black")
 		.text("XAXIS");
+
+
+    svgGraph
+        .select(".xaxis")
+        .selectAll(".tick")
+        .selectAll("text")
+        .attr("transform", "rotate(-45)")
     //
     svgGraph // or something else that selects the SVG element in your visualizations
 		.append("g") // create a group node
+        .attr("class", "yaxis")
 		.attr("transform", "translate(80, 0)")
 		.call(yAxis)
 		.append("text")
-		.attr("class", "label")
 		.attr("transform", "rotate(-90)")
 		.attr("y", 6)
 		.attr("dy", ".71em")
@@ -431,7 +514,7 @@ d3.csv("movies.csv", function(csv) {
         }
         var plotArr = [];
         plots.forEach(function(d,i) {
-            console.log(d);
+            //console.log(d);
             //all plots array
             // console.log(plotsAll);
             var plotsAll = csvData.map(function(p){
@@ -446,7 +529,7 @@ d3.csv("movies.csv", function(csv) {
                     }
                 })
             })
-            console.log(count);
+            //console.log(count);
             plotArr.push({text:d, size:count});
 
         })
@@ -470,8 +553,8 @@ d3.csv("movies.csv", function(csv) {
                 .attr("transform", function(d) { return "translate(200,200)"; })
 
         function draw(words) {
-            console.log("drawing wc");
-            console.log(words);
+            //console.log("drawing wc");
+            //console.log(words);
 
             var wordcloud = svgWord.selectAll("g text")
                 .data(words,function(d) { return d.text; })
