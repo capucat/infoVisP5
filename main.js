@@ -1,4 +1,4 @@
-var width =800;
+var width =850;
 var height = 600;
 var usingX;
 var usingY;
@@ -234,7 +234,7 @@ d3.csv("movies.csv", function(csv) {
         if (featureLinOrd[xAxisSelector] == "Linear") {
             //console.log(xScale);
             if (xAxisSelector == "num_critic_for_reviews") {
-                console.log("here");
+                //console.log("here");
                 xExtent = d3.extent(csvData, function(row) { return row.num_critic_for_reviews; });
                 xScale = d3.scaleLinear()
                 .domain(xExtent)
@@ -248,7 +248,7 @@ d3.csv("movies.csv", function(csv) {
                 xExtent = d3.extent(csv, function(row) { return row.imdb_score; });
                 xScale = d3.scaleLinear()
                 .domain(xExtent)
-                .range([10,width -10]);
+                .range([10,700]);
             } else if (xAxisSelector == "num_voted_users"){  
                 xExtent = d3.extent(csv, function(row) { return row.num_voted_users; });
                 xScale = d3.scaleLinear()
@@ -263,7 +263,7 @@ d3.csv("movies.csv", function(csv) {
                 xExtent = d3.extent(csv, function(row) { return row.budget; });
                 xScale = d3.scaleLinear()
                 .domain(xExtent)
-                .range([10,width -10]);
+                .range([10,700]);
             }
         } else if (xAxisSelector == "title_year") {
             xScale = d3.scaleOrdinal()
@@ -327,11 +327,11 @@ d3.csv("movies.csv", function(csv) {
         } if (yAxisSelector == "title_year") {
             yScale = d3.scaleOrdinal()
             .domain(["2010", "2011", "2012", "2013", "2014", "2015", "2016"])
-            .range([10, 110, 210, 310, 410, 510, 610]);
+            .range([10, 100, 190, 280, 370, 460, 550]);
         } if (yAxisSelector == "content_rating") {
             yScale = d3.scaleOrdinal()
             .domain(["G", "NC-17", "Not Rated", "PG", "PG-13", "R", "TV-14", "TV-G", "TV-MA", "TV-PG", "TV-Y", "TV-Y7", "Unrated"])
-            .range([10, 60, 110, 160, 210, 260, 310, 360, 410, 460, 510, 560, 610]);
+            .range([10, 55, 100, 145, 190, 235, 280, 325, 370, 415, 460, 505, 550]);
         }
         //yScale.extent(data, function (d) {return d.yAxisSelector})
         svgGraph.selectAll(".yaxis")
