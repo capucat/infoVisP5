@@ -217,7 +217,7 @@ d3.csv("movies.csv", function(csv) {
             yScale = d3.scaleLinear()
             .domain(yExtent)
             .range([height-30,30]);
-        } else if (xAxisSelector == "imdb_score"){
+        } else if (yAxisSelector == "imdb_score"){
             yExtent = d3.extent(csv, function(row) { return row.imdb_score; });
             yScale = d3.scaleLinear()
             .domain(yExtent)
@@ -252,6 +252,9 @@ d3.csv("movies.csv", function(csv) {
             .call(d3.axisLeft(yScale));
 
         svgGraph.selectAll("circle")
+            // .transition()
+            //  .ease('linear')
+            //  .duration(1000)
             .attr('cy',  function(d) { return yScale(d[yAxisSelector])});
 
         svgGraph
