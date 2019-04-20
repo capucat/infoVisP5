@@ -573,7 +573,9 @@ function drawMovies(csvData){
                         info.transition()
                             .duration(200)
                             .style("opacity",.8)
-                        info.html(f.movie_title + "<br/>"  + f.title_year +"<br/>"+f.genres)
+                        info.html(f.movie_title + "<br/>"  + f.title_year +"<br/>"+f.genres
+                                    +"<br/>"  + "IMDB: "+f.imdb_score +"<br/>"  + "Revenue: $"+f.gross +"<br/>"  + "FB likes: "+f.movie_facebook_likes
+                                +"<br/>"  + "Budget: $"+f.budget+ "<br/>"  + "Num Critics: "+f.num_critic_for_reviews)
                             .style("opacity",.8)
                             .style("left",(d3.event.pageX)+"px")
                             .style("top",(d3.event.pageY-28)+"px");
