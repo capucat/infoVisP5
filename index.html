@@ -7,31 +7,46 @@
         <script src="node_modules/d3-cloud/build/d3.layout.cloud.js"></script>
         <script src="https://d3js.org/d3-scale.v3.min.js"></script>
 		<script type="text/javascript" src="main.js"></script>
+        <!-- <link href="https://fonts.googleapis.com/css?family=Playfair+Display+SC" rel="stylesheet"> -->
+        <link href="https://fonts.googleapis.com/css?family=Cormorant+Garamond" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css?family=Kosugi|Montserrat+Subrayada" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css?family=Share+Tech" rel="stylesheet">
    	</head>
    	<body>
+        <h1 style="text-align:center; font-size:30px">MOVIES VISUALIZATIONS</h1>
 	   	<div id="wrapper">
-            <select id='xAxisFilter' style="margin-right:10px">
-                <option value='num_critic_for_reviews'>Number of Critics for Reviews</option>
-                <option value='imdb_score'>IMDB Score</option>
-                <option selected value='title_year'>Year</option>
-                <option value='num_voted_users'>Number of Voted Users</option>
-                <option value='num_user_for_reviews'>Number of Users for Reviews</option>
-                <option value='budget'>Budget</option>
-                <option value='content_rating'>Content Rating</option>
+            <span>
+                <div class='filter'>
+                    <label>Y-AXIS</label>
+                    <select id='yAxisFilter'>
+                        <option value='num_critic_for_reviews'>Number of Critics for Reviews</option>
+                        <option selected value='gross'>Gross Revenue</option>
+                        <option value='title_year'>Year</option>
+                        <option value='num_voted_users'>Number of Voted Users</option>
+                        <option value='num_user_for_reviews'>Number of Users for Reviews</option>
+                        <option value='budget'>Budget</option>
+                        <option value='content_rating'>Content Rating</option>
+                    </select>
+                </div>
+            <div class='filter'>
+                <label>X-AXIS</label>
+                <select id='xAxisFilter'>
+                    <option value='num_critic_for_reviews'>Number of Critics for Reviews</option>
+                    <option value='imdb_score'>IMDB Score</option>
+                    <option selected value='title_year'>Year</option>
+                    <option value='num_voted_users'>Number of Voted Users</option>
+                    <option value='num_user_for_reviews'>Number of Users for Reviews</option>
+                    <!-- <option value='budget'>Budget</option> -->
+                    <option value='content_rating'>Content Rating</option>
 
-            </select>
-            <select id='yAxisFilter' style="margin-right:10px">
-                <option value='num_critic_for_reviews'>Number of Critics for Reviews</option>
-                <option selected value='gross'>Gross Revenue</option>
-                <option value='title_year'>Year</option>
-                <option value='num_voted_users'>Number of Voted Users</option>
-                <option value='num_user_for_reviews'>Number of Users for Reviews</option>
-                <option value='budget'>Budget</option>
-                <option value='content_rating'>Content Rating</option>
-            </select>
+                </select>
+            </div>
+
+            </span>
 			<div id="mainScatter">
 	    	</div>
-            <div id='detailsOnDemand' style="margin-right:10px">
+            <!-- style="margin-right:10px" -->
+            <div id='detailsOnDemand'>
                 <strong>Movie Title:</strong> <span id="mvt"></span><br/>
                 <strong>Director Name:</strong> <span id="dn"></span><br/>
                 <strong>Duration:</strong> <span id="dur"></span><br/>
@@ -40,30 +55,21 @@
                 <strong>IMDB Link:</strong> <span id="imlk"></span><br/>
                 <strong>Content Rating:</strong> <span id="ctrng"></span><br/>
                 <strong>Year:</strong> <span id="yr"></span><br/>
-                <strong>Plot-Keywords:</strong> <span id="plkw"></span><br/>
+                <strong>Plot-Keywords:</strong> <div style="width:100px" id="plkw"></div>
                 <strong>Language:</strong> <span id="lang"></span><br/>
                 <strong>Aspect (Screen Dim.) Ratio:</strong> <span id="asrt"></span><br/>
                 <strong>Movie-Facebook Likes:</strong> <span id="mfbl"></span><br/>
                 <strong>Color:</strong> <span id="col"></span><br/>
                 <strong>Budget:</strong> <span id="budget"></span><br/>
-
-            </div>
                 <strong>Country:</strong> <span id="country"></span><br/>
+                <div id="wordCloud">
+                    <h1 style="text-align:center">Word Cloud</h1>
+                </div>
             </div>
-            <div id="wordCloud">
-            </div>
+
             <div id="calendar">
+                <h1 style="text-align:left; margin-left:10px;">GENRE GRID</h1>
                 <div>
-                    <!-- <Button id="yrChoice">Year</Button> -->
-                    <select id="yrChoice">
-                        <option selected value='2010'>2010</option>
-                        <option value='2011'>2011</option>
-                        <option value='2012'>2012</option>
-                        <option value='2013'>2013</option>
-                        <option value='2014'>2014</option>
-                        <option value='2015'>2015</option>
-                        <option value='2016'>2016</option>
-                    </select>
                     <select id="colorFilter">
                         <option selected value='imdb_score'>IMDB Score</option>
                         <option value='gross'>Gross Revenue</option>
@@ -71,8 +77,25 @@
                         <option value='budget'>Budget</option>
                         <option value='num_critic_for_reviews'>Number of Critics for Reviews</option>
                     </select>
-                    <Button id="filCol">Color Filter</Button>
+                    <Button class="btn" id="filCol">Color Filter</Button>
+                    <div class="swatch-container">
+                        <text id="xVal" style="margin-right: 6px;">minValue</text>
+                        <div class ="swatch" style="background-color:rgb(222,226,255)">
+                        </div>
+                        <div class ="swatch" style="background-color:rgb(197,201,230)">
+                        </div>
+                        <div class ="swatch" style="background-color:rgb(172,176,205)">
+                        </div>
+                        <div class ="swatch" style="background-color:rgb(148,152,181)">
+                        </div>
+                        <div class ="swatch" style="background-color:rgb(125,129,157)">
+                        </div>
+                        <div class ="swatch" style="background-color:rgb(102,106,134)">
+                        </div>
+                        <text id="yVal" style="margin-left: 6px;">maxValue</text>
+                    </div>
                 </div>
+
             </div>
 	   	</div>
 	</body>

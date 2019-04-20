@@ -1,5 +1,18 @@
+/* font-family: 'Kosugi', sans-serif; */
 body {
   font: 12px sans-serif;
+  /* font-family: 'Playfair Display SC', serif; */
+  font-family: 'Share Tech', sans-serif;
+  /* background-color: #F1F2EB; */
+
+}
+h1 {
+    color: #987284;
+    font-size: 24px;
+    /* #987284 */
+    font-weight: bold;
+    font-family: 'Montserrat Subrayada', sans-serif;
+    /* background-color: #75B9BE */
 }
 .tick > line {
 	fill: none;
@@ -29,43 +42,77 @@ path.domain {
 }
 
 .clicked {
-	fill:red;
-	stroke:red;
+	fill:#EE7674;
+	stroke:#EE7674;
 }
-/* #chart2{
-	float:left;
-}
-#chart3 {
-	float:left;
-	margin-top: 30px;
-	margin-left: 20px;
-} */
-/* .brush .extent {
-	fill-opacity: .1;
-	stroke: #fff;
-	shape-rendering: crispEdges;
-} */
+
 .tooltip {
     position: absolute;
     text-align: center;
-    width: 100px;
+    /* width: 100px; */
     height: 60px;
     padding: 2px;
     font: 12px sans-serif;
-/* background: lightsteelblue; */
-    background:rgba(200,0,0,0.6);
+    font-family: 'Cormorant Garamond', serif;
+    background:rgba(249,181,172,0.8);
     border: 0px;
     border-radius: 8px;
     pointer-events: none;
 }
 .genre {
     position:relative;
-    /* margin: 20px; */
     width: 300px;
     height:300px;
     display:inline-block;
 }
 .yearCal {
     position:relative;
+    display:inline-block;
+}
+/* BUTTONS */
+.btn {
+    font-size: 12px;
+    background-color: #acb0cd;
+    border-radius: 6px;
+    margin-left: 10px;
+}
+/* DETAILS */
+#detailsOnDemand {
+
+    display:inline-block;
+    margin-right:10px;
+    font-size: 15px;
+
+}
+
+.filter{
+    float:right;
+    margin-right:10px;
+    margin-bottom:10px;
+}
+.swatch{
+    /* display:inline; */
+    width:20px;
+    height:20px;
+}
+.swatch-container{
+    display:flex;
+    margin-left:10px;
+    margin-top: 20px;
+    /* width:80px;
+    height:20px; */
+}
+/* option {
+      font-family: 'Playfair Display SC', serif;
+} */
+#colorFilter{
+    margin-left:10px;
+}
+#wordCloud{
+    /* float:right; */
+    width:400px;
+    height:400px;
+}
+#calendar{
     display:inline-block;
 }
